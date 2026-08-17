@@ -1,0 +1,27 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Laravel
+backend/vendor/
+backend/.env
+backend/storage/logs/*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+Thumbs.db

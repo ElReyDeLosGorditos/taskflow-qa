@@ -1,0 +1,76 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+
+      - name: Install Playwright dependencies
+        run: npm ci
+
+      - name: Install Frontend
+        run: |
+          cd frontend
+          npm install
+
+      - name: Install Backend
+        run: |
+          cd backend
+          composer install
+
+      - name: Install Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Prepare Laravel
+        run: |
+          cd backend
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+
+      - name: Start Laravel
+        run: |
+          cd backend
+          php artisan serve &
+        shell: bash
+
+      - name: Start React
+        run: |
+          cd frontend
+          npm run dev &
+        shell: bash
+
+      - name: Wait for servers
+        run: npx wait-on http://localhost:5173 http://127.0.0.1:8000
+
+      - name: Run Playwright
+        env:
+          PLAYWRIGHT_EMAIL: test@example.com
+          PLAYWRIGHT_PASSWORD: password123
+          PLAYWRIGHT_BASE_URL: http://localhost:5173
+        run: npx playwright test
+
+      - name: Upload Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
