@@ -11,6 +11,8 @@ export default function TaskForm({
     status: initialData?.status || "todo",
   });
 
+  const [saving, setSaving] = useState(false);
+
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -18,9 +20,18 @@ export default function TaskForm({
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(form);
+
+    if (saving) return;
+
+    setSaving(true);
+
+    try {
+      await onSubmit(form);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -92,9 +103,10 @@ export default function TaskForm({
             <button
               data-testid="task-submit"
               type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+              disabled={saving}
+              className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {initialData ? "Save Changes" : "Create Task"}
+              {saving ? "Creating..." : "Create Task"}
             </button>
           </div>
         </form>
