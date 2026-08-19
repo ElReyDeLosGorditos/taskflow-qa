@@ -84,8 +84,8 @@ taskflow-qa/
 
 ### Prerequisites
 
-- Node.js 20+
-- PHP 8.3+
+- Node.js 24
+- PHP 8.4+
 - Composer
 - MySQL
 - Git
