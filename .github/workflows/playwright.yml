@@ -2,9 +2,9 @@ name: Playwright Tests
 
 on:
 push:
-branches: ["main"]
+branches: [main]
 pull_request:
-branches: ["main"]
+branches: [main]
 
 jobs:
 playwright:
@@ -36,7 +36,7 @@ steps:
   - name: Setup PHP
     uses: shivammathur/setup-php@v2
     with:
-      php-version: 8.3
+      php-version: "8.3"
       extensions: pdo_mysql
 
   - name: Install root dependencies
@@ -55,7 +55,6 @@ steps:
     run: |
       cp .env.example .env
       php artisan key:generate
-
       sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
       sed -i 's/DB_DATABASE=.*/DB_DATABASE=taskflowqa/' .env
       sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
