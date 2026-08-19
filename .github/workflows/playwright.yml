@@ -1,76 +1,85 @@
 name: Playwright Tests
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+push:
+branches: ["main"]
+pull_request:
+branches: ["main"]
 
 jobs:
-  playwright:
-    runs-on: ubuntu-latest
+playwright:
+runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+services:
+  mysql:
+    image: mysql:8.0
+    env:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: taskflowqa
+    ports:
+      - 3306:3306
+    options: >-
+      --health-cmd="mysqladmin ping -proot"
+      --health-interval=10s
+      --health-timeout=5s
+      --health-retries=10
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.3
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
 
-      - name: Install Playwright dependencies
-        run: npm ci
+  - name: Setup PHP
+    uses: shivammathur/setup-php@v2
+    with:
+      php-version: 8.3
+      extensions: pdo_mysql
 
-      - name: Install Frontend
-        run: |
-          cd frontend
-          npm install
+  - name: Install root dependencies
+    run: npm ci
 
-      - name: Install Backend
-        run: |
-          cd backend
-          composer install
+  - name: Install frontend dependencies
+    working-directory: frontend
+    run: npm ci
 
-      - name: Install Browsers
-        run: npx playwright install --with-deps chromium
+  - name: Install backend dependencies
+    working-directory: backend
+    run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare Laravel
-        run: |
-          cd backend
-          cp .env.example .env
-          php artisan key:generate
-          php artisan migrate --force
+  - name: Configure Laravel
+    working-directory: backend
+    run: |
+      cp .env.example .env
+      php artisan key:generate
 
-      - name: Start Laravel
-        run: |
-          cd backend
-          php artisan serve &
-        shell: bash
+      sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+      sed -i 's/DB_DATABASE=.*/DB_DATABASE=taskflowqa/' .env
+      sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+      sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=root/' .env
 
-      - name: Start React
-        run: |
-          cd frontend
-          npm run dev &
-        shell: bash
+  - name: Run migrations and seed database
+    working-directory: backend
+    run: |
+      php artisan migrate --force
+      php artisan db:seed --force
 
-      - name: Wait for servers
-        run: npx wait-on http://localhost:5173 http://127.0.0.1:8000
+  - name: Install Playwright browsers
+    run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright
-        env:
-          PLAYWRIGHT_EMAIL: test@example.com
-          PLAYWRIGHT_PASSWORD: password123
-          PLAYWRIGHT_BASE_URL: http://localhost:5173
-        run: npx playwright test
+  - name: Run Playwright tests
+    env:
+      PLAYWRIGHT_EMAIL: test@example.com
+      PLAYWRIGHT_PASSWORD: password123
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:5173
+    run: npx playwright test
 
-      - name: Upload Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
+  - name: Upload Playwright Report
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: playwright-report
+      path: playwright-report/
