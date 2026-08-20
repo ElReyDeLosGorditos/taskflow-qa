@@ -2,7 +2,7 @@
 
 A full-stack task management application built with **React, Laravel, MySQL, and Playwright** to demonstrate end-to-end testing, Page Object Model (POM), and QA automation practices.
 
-> Built as a portfolio project to showcase practical QA automation skills beyond writing isolated Playwright scripts.
+This project showcases how an application can be built, tested, and validated through automated end-to-end testing using the **Page Object Model (POM), GitHub Actions CI, and real-world testing workflows.**
 
 ---
 
@@ -59,6 +59,17 @@ This project demonstrates:
 - Edit Task Test
 - Delete Task Test
 - Rapid Click (Duplicate Submission) Test
+
+### QA Automation
+
+- ✅ Page Object Model (POM)
+- ✅ Playwright End-to-End Testing
+- ✅ HTML Test Reports
+- ✅ Screenshots on Test Execution
+- ✅ Video Recording
+- ✅ Trace Viewer
+- ✅ GitHub Actions Continuous Integration
+- ✅ Automated Database Seeding
 
 ---
 
