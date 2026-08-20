@@ -1,9 +1,8 @@
-//Shared Login Helper
 export async function login(page) {
   await page.goto("/login");
 
-  await page.getByTestId("login-email").fill("cat@gmail.com");
-  await page.getByTestId("login-password").fill("password123");
+  await page.getByTestId("login-email").fill(process.env.PLAYWRIGHT_EMAIL);
+  await page.getByTestId("login-password").fill(process.env.PLAYWRIGHT_PASSWORD);
 
   await page.getByTestId("login-button").click();
 }
